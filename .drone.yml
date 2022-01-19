@@ -5,7 +5,7 @@ name: docker-build
 
 steps:
   - name: docker
-    image: plugins/docker
+    image: plugins/kaniko:linux-amd64
     settings:
       repo: 15cm/mastodon
       auto_tag: true

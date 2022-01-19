@@ -82,8 +82,9 @@ RUN apt-get update && \
 # Note: no, cleaning here since Debian does this automatically
 # See the file /etc/apt/apt.conf.d/docker-clean within the Docker image's filesystem
 
-COPY --chown=mastodon:mastodon . /opt/mastodon
-COPY --chown=mastodon:mastodon --from=build /opt/mastodon /opt/mastodon
+# Copy over mastodon source, and dependencies from building, and set permissions
+COPY --chown=root:root . /opt/mastodon
+COPY --chown=root:root --from=build /opt/mastodon /opt/mastodon
 
 ENV RAILS_ENV="production" \
     NODE_ENV="production" \
@@ -92,8 +93,6 @@ ENV RAILS_ENV="production" \
     MASTODON_VERSION_FLAGS="${MASTODON_VERSION_FLAGS}" \
     MASTODON_VERSION_SUFFIX="${MASTODON_VERSION_SUFFIX}"
 
-# Set the run user
-USER mastodon
 WORKDIR /opt/mastodon
 
 # Precompile assets

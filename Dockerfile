@@ -71,16 +71,10 @@ COPY --from=build-dep /opt/ruby /opt/ruby
 # Add more PATHs to the PATH
 ENV PATH="${PATH}:/opt/ruby/bin:/opt/node/bin:/opt/mastodon/bin"
 
-# Create the mastodon user
-ARG UID=991
-ARG GID=991
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 RUN apt-get update && \
 	echo "Etc/UTC" > /etc/localtime && \
 	apt-get install -y --no-install-recommends whois wget && \
-	addgroup --gid $GID mastodon && \
-	useradd -m -u $UID -g $GID -d /opt/mastodon mastodon && \
-	echo "mastodon:$(head /dev/urandom | tr -dc A-Za-z0-9 | head -c 24 | mkpasswd -s -m sha-256)" | chpasswd && \
 	rm -rf /var/lib/apt/lists/*
 
 # Install mastodon runtime deps
@@ -96,8 +90,8 @@ RUN apt-get update && \
 	rm -rf /var/lib/apt/lists/*
 
 # Copy over mastodon source, and dependencies from building, and set permissions
-COPY --chown=mastodon:mastodon . /opt/mastodon
-COPY --from=build-dep --chown=mastodon:mastodon /opt/mastodon /opt/mastodon
+COPY --chown=root:root . /opt/mastodon
+COPY --from=build-dep --chown=root:root /opt/mastodon /opt/mastodon
 
 # Run mastodon services in prod mode
 ENV RAILS_ENV="production"
@@ -107,13 +101,10 @@ ENV NODE_ENV="production"
 ENV RAILS_SERVE_STATIC_FILES="true"
 ENV BIND="0.0.0.0"
 
-# Set the run user
-USER mastodon
-
 # Precompile assets
-RUN cd ~ && \
-	OTP_SECRET=precompile_placeholder SECRET_KEY_BASE=precompile_placeholder rails assets:precompile && \
-	yarn cache clean
+RUN cd /opt/mastodon && \
+    OTP_SECRET=precompile_placeholder SECRET_KEY_BASE=precompile_placeholder rails assets:precompile && \
+    yarn cache clean
 
 # Set the work dir and the container entry point
 WORKDIR /opt/mastodon

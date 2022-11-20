@@ -40,6 +40,9 @@ RUN apt update && \
 
 FROM node:${NODE_VERSION}
 
+ARG UID="991"
+ARG GID="991"
+
 COPY --from=ruby /opt/ruby /opt/ruby
 
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]

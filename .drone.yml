@@ -5,7 +5,7 @@ name: docker-build
 
 steps:
   - name: docker
-    image: 15cm/drone-kaniko
+    image: plugins/kaniko:1.6.10-kaniko1.8.1
     settings:
       repo: 15cm/mastodon
       auto_tag: true

@@ -77,6 +77,8 @@ RUN apt-get update && \
 COPY . /opt/mastodon
 COPY --from=build /opt/mastodon /opt/mastodon
 
+WORKDIR /opt/mastodon
+
 ENV RAILS_ENV="production" \
     NODE_ENV="production" \
     RAILS_SERVE_STATIC_FILES="true" \

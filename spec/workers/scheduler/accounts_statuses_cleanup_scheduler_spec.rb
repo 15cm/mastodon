@@ -1,5 +1,3 @@
-# frozen_string_literal: true
-
 require 'rails_helper'
 
 describe Scheduler::AccountsStatusesCleanupScheduler do
@@ -23,7 +21,7 @@ describe Scheduler::AccountsStatusesCleanupScheduler do
     [
       {
         'concurrency' => 2,
-        'queues' => %w(push default),
+        'queues' => ['push', 'default'],
       },
     ]
   end
@@ -76,18 +74,18 @@ describe Scheduler::AccountsStatusesCleanupScheduler do
   end
 
   describe '#compute_budget' do
-    context 'with a single thread' do
-      let(:process_set_stub) { [{ 'concurrency' => 1, 'queues' => %w(push default) }] }
+    context 'on a single thread' do
+      let(:process_set_stub) { [ { 'concurrency' => 1, 'queues' => ['push', 'default'] } ] }
 
       it 'returns a low value' do
         expect(subject.compute_budget).to be < 10
       end
     end
 
-    context 'with a lot of threads' do
+    context 'on a lot of threads' do
       let(:process_set_stub) do
         [
-          { 'concurrency' => 2, 'queues' => %w(push default) },
+          { 'concurrency' => 2, 'queues' => ['push', 'default'] },
           { 'concurrency' => 2, 'queues' => ['push'] },
           { 'concurrency' => 2, 'queues' => ['push'] },
           { 'concurrency' => 2, 'queues' => ['push'] },

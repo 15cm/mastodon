@@ -10,6 +10,8 @@ class Oauth::AuthorizedApplicationsController < Doorkeeper::AuthorizedApplicatio
 
   before_action :set_last_used_at_by_app, only: :index, unless: -> { request.format == :json }
 
+  before_action :set_last_used_at_by_app, only: :index, unless: -> { request.format == :json }
+
   skip_before_action :require_functional!
 
   include Localized
@@ -31,6 +33,16 @@ class Oauth::AuthorizedApplicationsController < Doorkeeper::AuthorizedApplicatio
 
   def require_not_suspended!
     forbidden if current_account.suspended?
+  end
+
+  def set_last_used_at_by_app
+    @last_used_at_by_app = Doorkeeper::AccessToken
+                           .select('DISTINCT ON (application_id) application_id, last_used_at')
+                           .where(resource_owner_id: current_resource_owner.id)
+                           .where.not(last_used_at: nil)
+                           .order(application_id: :desc, last_used_at: :desc)
+                           .pluck(:application_id, :last_used_at)
+                           .to_h
   end
 
   def set_last_used_at_by_app

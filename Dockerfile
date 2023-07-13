@@ -5,7 +5,7 @@ ARG NODE_VERSION="16.18.1-bullseye-slim"
 FROM ghcr.io/moritzheiber/ruby-jemalloc:3.0.6-slim as ruby
 FROM node:${NODE_VERSION} as build
 
-COPY --link --from=ruby /opt/ruby /opt/ruby
+COPY --from=ruby /opt/ruby /opt/ruby
 
 ENV DEBIAN_FRONTEND="noninteractive" \
     PATH="${PATH}:/opt/ruby/bin"
@@ -41,10 +41,7 @@ RUN apt-get update && \
 
 FROM node:${NODE_VERSION}
 
-ARG UID="991"
-ARG GID="991"
-
-COPY --link --from=ruby /opt/ruby /opt/ruby
+COPY --from=ruby /opt/ruby /opt/ruby
 
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 
@@ -55,8 +52,6 @@ ENV DEBIAN_FRONTEND="noninteractive" \
 # hadolint ignore=DL3008,DL3009
 RUN apt-get update && \
     echo "Etc/UTC" > /etc/localtime && \
-    groupadd -g "${GID}" mastodon && \
-    useradd -l -u "$UID" -g "${GID}" -m -d /opt/mastodon mastodon && \
     apt-get -y --no-install-recommends install whois \
         wget \
         procps \
@@ -78,16 +73,14 @@ RUN apt-get update && \
 # Note: no, cleaning here since Debian does this automatically
 # See the file /etc/apt/apt.conf.d/docker-clean within the Docker image's filesystem
 
-COPY --chown=mastodon:mastodon . /opt/mastodon
-COPY --chown=mastodon:mastodon --from=build /opt/mastodon /opt/mastodon
+COPY . /opt/mastodon
+COPY --from=build /opt/mastodon /opt/mastodon
 
 ENV RAILS_ENV="production" \
     NODE_ENV="production" \
     RAILS_SERVE_STATIC_FILES="true" \
     BIND="0.0.0.0"
 
-# Set the run user
-USER mastodon
 WORKDIR /opt/mastodon
 
 # Precompile assets

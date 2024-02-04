@@ -1,0 +1,48 @@
+---
+kind: pipeline
+type: docker
+name: docker-build-web
+
+steps:
+  - name: docker
+    image: plugins/kaniko:1.6.10-kaniko1.8.1
+    settings:
+      repo: 15cm/mastodon
+      auto_tag: true
+      username:
+        from_secret: docker_username
+      password:
+        from_secret: docker_password
+
+trigger:
+  branch:
+    - custom
+  event:
+    - push
+    - custom
+    - tag
+
+---
+kind: pipeline
+type: docker
+name: docker-build-streaming
+
+steps:
+  - name: docker
+    image: plugins/kaniko:1.6.10-kaniko1.8.1
+    settings:
+      repo: 15cm/mastodon-streaming
+      dockerfile: streaming/Dockerfile
+      auto_tag: true
+      username:
+        from_secret: docker_username
+      password:
+        from_secret: docker_password
+
+trigger:
+  branch:
+    - custom
+  event:
+    - push
+    - custom
+    - tag

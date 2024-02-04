@@ -1,8 +1,3 @@
-# syntax=docker/dockerfile:1.9
-
-# This file is designed for production server deployment, not local development work
-# For a containerized local dev environment, see: https://github.com/mastodon/mastodon/blob/main/README.md#docker
-
 # Please see https://docs.docker.com/engine/reference/builder for information about
 # the extended buildx capabilities used in this file.
 # Make sure multiarch TARGETPLATFORM is available for interpolation
@@ -83,9 +78,6 @@ RUN \
   rm -f /etc/apt/apt.conf.d/docker-clean; \
 # Sets timezone
   echo "${TZ}" > /etc/localtime; \
-# Creates mastodon user/group and sets home directory
-  groupadd -g "${GID}" mastodon; \
-  useradd -l -u "${UID}" -g "${GID}" -m -d /opt/mastodon mastodon; \
 # Creates /mastodon symlink to /opt/mastodon
   ln -s /opt/mastodon /mastodon;
 
@@ -389,15 +381,6 @@ RUN \
   # Precompile bootsnap code for faster Rails startup
   bundle exec bootsnap precompile --gemfile app/ lib/;
 
-RUN \
-# Pre-create and chown system volume to Mastodon user
-  mkdir -p /opt/mastodon/public/system; \
-  chown mastodon:mastodon /opt/mastodon/public/system; \
-# Set Mastodon user as owner of tmp folder
-  chown -R mastodon:mastodon /opt/mastodon/tmp;
-
-# Set the running user for resulting container
-USER mastodon
 # Expose default Puma ports
 EXPOSE 3000
 # Set container tini as default entry point

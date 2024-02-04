@@ -1,5 +1,3 @@
-# syntax=docker/dockerfile:1.9
-
 # Please see https://docs.docker.com/engine/reference/builder for information about
 # the extended buildx capabilities used in this file.
 # Make sure multiarch TARGETPLATFORM is available for interpolation
@@ -59,9 +57,6 @@ RUN \
   rm -f /etc/apt/apt.conf.d/docker-clean; \
 # Sets timezone
   echo "${TZ}" > /etc/localtime; \
-# Creates mastodon user/group and sets home directory
-  groupadd -g "${GID}" mastodon; \
-  useradd -l -u "${UID}" -g "${GID}" -m -d /opt/mastodon mastodon; \
 # Creates symlink for /mastodon folder
   ln -s /opt/mastodon /mastodon;
 
@@ -105,8 +100,6 @@ RUN \
 # Install Node packages
   yarn workspaces focus --production @mastodon/streaming;
 
-# Set the running user for resulting container
-USER mastodon
 # Expose default Streaming ports
 EXPOSE 4000
 # Run streaming when started
